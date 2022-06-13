@@ -50,6 +50,39 @@ class PokemonTcgApi {
     });
     return cards;
   }
+  
+  /// Gets a paginated list of all pokemon cards by name.
+  Future<List<PokemonCard>> getCardsByName({
+    int page = 0,
+    required String name
+    
+  }) async {
+    http.Response response;
+    if (page == 0) {
+      response = await client.get(
+        Uri.parse('$_baseUrl/cards?q=name:$name'),
+        headers: {
+          'x-api-key': apiKey,
+        },
+      );
+    } else {
+      response = await client.get(
+        //https://api.pokemontcg.io/v2/cards?q=name:
+        Uri.parse('$_baseUrl/cards?page=$page&q=name:$name'),
+        headers: {
+          'x-api-key': apiKey,
+        },
+      );
+    }
+
+    JsonMap json = jsonDecode(response.body);
+    final cards = <PokemonCard>[];
+    List<dynamic> cardsJson = json['data'];
+    cardsJson.forEach((element) {
+      cards.add(PokemonCard.fromJson(element));
+    });
+    return cards;
+  }
 
   /// Gets a paginated list of all pokemon cards for a particular set.
   Future<List<PokemonCard>> getCardsForSet(
